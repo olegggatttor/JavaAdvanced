@@ -1,7 +1,7 @@
-cd ..\..\..\..\..\..\..\
-
+cd ..\..\..\..\..\..\
+SET solutions=%cd%
+cd ..
 SET root=%cd%
-SET solutions=%root%\java-advanced-2020-solutions
 SET utils=info\kgeorgiy\java\advanced\implementor
 SET my_pack=ru\ifmo\rain\bobrov\implementor
 SET modules_files=%root%\java-advanced-2020\modules\info.kgeorgiy.java.advanced.implementor\%utils%
