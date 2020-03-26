@@ -15,5 +15,5 @@ copy %solutions%\java-solutions\%my_pack%\JarImplementor.java %out%\%my_pack%
 copy %modules_files%\Impler.java %out%\%utils%
 copy %modules_files%\JarImpler.java %out%\%utils%
 copy %modules_files%\ImplerException.java %out%\%utils%
-javadoc -d javadoc -link https://docs.oracle.com/en/java/javase/11/docs/api -cp %out% -private -author %out%\%my_pack%\JarImplementor.java %out%\%utils%\Impler.java %out%\%utils%\JarImpler.java %out%\%utils%\ImplerException.java
+javadoc -d javadoc -link https://docs.oracle.com/en/java/javase/11/docs/api -d %root%\java-advanced-2020-solutions\java-solutions\%my_pack%\_javadoc -cp %out% -private -author %out%\%my_pack%\JarImplementor.java %out%\%utils%\Impler.java %out%\%utils%\JarImpler.java %out%\%utils%\ImplerException.java
 pause

@@ -1,0 +1,1 @@
+Main-Class: ru.ifmo.rain.bobrov.implementor.JarImplementor

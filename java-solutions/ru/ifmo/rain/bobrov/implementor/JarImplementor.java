@@ -22,6 +22,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 /**
  * Class provides public methods to generate implementations for given interfaces and packs it into {@code .jar} if it is needed.
@@ -150,7 +151,7 @@ public class JarImplementor implements Impler, JarImpler {
         try {
             CodeSource codeSource = token.getProtectionDomain().getCodeSource();
             String uri = codeSource == null ? "" : codeSource.getLocation().getPath();
-            if (uri.toCharArray()[0] == '/') {
+            if (uri.startsWith("/")) {
                 uri = uri.substring(1);
             }
             originalPath = Path.of(uri);
@@ -189,7 +190,7 @@ public class JarImplementor implements Impler, JarImpler {
         try (JarOutputStream stream = new JarOutputStream(Files.newOutputStream(jarPath), manifest)) {
             String name = String.join("/", token.getPackageName().split("\\.")) +
                     "/" + token.getSimpleName() + "Impl.class";
-            stream.putNextEntry(new JarEntry(name));
+            stream.putNextEntry(new ZipEntry(name));
             Files.copy(Paths.get(implementationPath.toString(), name), stream);
         } catch (IOException e) {
             throw new ImplerException("Impossible to create jar " + e.getMessage());
@@ -361,7 +362,7 @@ public class JarImplementor implements Impler, JarImpler {
     /**
      * Deletes all files of directory {@link File} recursively.
      *
-     * @param file target directory {@link Path}
+     * @param file target directory {@link File}
      * @return {@code true} if dir was successfully deleted and false either
      */
     private boolean deleteDir(File file) {

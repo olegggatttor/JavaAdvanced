@@ -1,6 +1,7 @@
 package ru.ifmo.rain.bobrov.concurrent;
 
 import info.kgeorgiy.java.advanced.concurrent.ScalarIP;
+import info.kgeorgiy.java.advanced.mapper.ParallelMapper;
 
 import java.util.*;
 import java.util.function.Function;
@@ -19,12 +20,16 @@ import java.util.stream.Stream;
  * @see ScalarIP
  */
 public class IterativeParallelism implements ScalarIP {
-
+    private final ParallelMapper mapper;
     /**
      * Default constructor.
      */
     public IterativeParallelism() {
+        mapper = null;
+    }
 
+    public IterativeParallelism(ParallelMapper parallelMapper) {
+        mapper = parallelMapper;
     }
 
     private <T, R> R createThreadsJob(int threads, List<? extends T> values,
@@ -37,7 +42,7 @@ public class IterativeParallelism implements ScalarIP {
         final int blockSize = values.size() / amountOfThreads;
         final int remainder = values.size() % amountOfThreads;
         ArrayList<Stream<? extends T>> streams = new ArrayList<>();
-        ArrayList<R> partialResults = new ArrayList<>(Collections.nCopies(amountOfThreads, null));
+        final List<R> partialResults;
         int index = 0;
         for (int thread = 0; thread < amountOfThreads; thread++) {
             final int curBlockSize = blockSize + ((thread < remainder) ? 1 : 0);
@@ -46,22 +51,27 @@ public class IterativeParallelism implements ScalarIP {
             }
             index += curBlockSize;
         }
-        ArrayList<Thread> workers = new ArrayList<>();
-        for (int curThread = 0; curThread < amountOfThreads; curThread++) {
-            final int threadPos = curThread;
-            workers.add(new Thread(() -> partialResults.set(threadPos, partialJob.apply(streams.get(threadPos)))));
-            workers.get(threadPos).start();
-        }
-        InterruptedException exception = new InterruptedException();
-        for (Thread thread : workers) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                exception.addSuppressed(e);
+        if(mapper == null) {
+            partialResults = new ArrayList<>(Collections.nCopies(amountOfThreads, null));
+            ArrayList<Thread> workers = new ArrayList<>();
+            for (int curThread = 0; curThread < amountOfThreads; curThread++) {
+                final int threadPos = curThread;
+                workers.add(new Thread(() -> partialResults.set(threadPos, partialJob.apply(streams.get(threadPos)))));
+                workers.get(threadPos).start();
             }
-        }
-        if (exception.getSuppressed().length != 0) {
-            throw exception;
+            InterruptedException exception = new InterruptedException();
+            for (Thread thread : workers) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    exception.addSuppressed(e);
+                }
+            }
+            if (exception.getSuppressed().length != 0) {
+                throw exception;
+            }
+        } else {
+            partialResults = mapper.map(partialJob, streams);
         }
         return finalJob.apply(partialResults.stream());
     }
