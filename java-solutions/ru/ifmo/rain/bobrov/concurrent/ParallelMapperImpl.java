@@ -37,19 +37,26 @@ public class ParallelMapperImpl implements ParallelMapper {
                         while (taskQueue.isEmpty()) {
                             try {
                                 taskQueue.wait();
-                            } catch (InterruptedException ignored) {
-                                
-                            } finally {
-								Thread.currentThread().interrupt();
-							}
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
                         }
                         task = taskQueue.poll();
+                        taskQueue.notify();
                     }
                     task.run();
                 }
             }));
             workers.get(curThread).start();
         }
+    }
+
+    /**
+     * Default constructor
+     */
+    public ParallelMapperImpl() {
+
     }
 
     private class Task<T, R> {
@@ -87,7 +94,6 @@ public class ParallelMapperImpl implements ParallelMapper {
         for (int i = 0; i < args.size(); i++) {
             tasks.add(new Task<>(f, args.get(i)));
             taskQueue.add(tasks.get(i));
-            taskQueue.notify();
         }
         synchronized (taskQueue) {
             taskQueue.notifyAll();
