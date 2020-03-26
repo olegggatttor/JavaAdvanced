@@ -114,6 +114,7 @@ public class ParallelMapperImpl implements ParallelMapper {
             taskQueue.clear();
             workers.forEach(Thread::interrupt);
             workers.clear();
+            taskQueue.notify();
         }
     }
 }
