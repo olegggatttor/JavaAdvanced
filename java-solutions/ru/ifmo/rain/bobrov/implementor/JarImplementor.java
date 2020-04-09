@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -149,14 +150,9 @@ public class JarImplementor implements Impler, JarImpler {
     private void compile(Class<?> token, Path implementationPath) throws ImplerException {
         Path originalPath;
         try {
-            CodeSource codeSource = token.getProtectionDomain().getCodeSource();
-            String uri = codeSource == null ? "" : codeSource.getLocation().getPath();
-            if (uri.startsWith("/")) {
-                uri = uri.substring(1);
-            }
-            originalPath = Path.of(uri);
-        } catch (InvalidPathException e) {
-            throw new ImplerException("Impossible to find valid class path: " + e.getMessage());
+            originalPath = Path.of(token.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (final URISyntaxException e) {
+            throw new ImplerException("Wrong compile path.");
         }
         String[] compilerArgs = {
                 "-encoding", "UTF-8",
@@ -362,7 +358,7 @@ public class JarImplementor implements Impler, JarImpler {
     /**
      * Deletes all files of directory {@link File} recursively.
      *
-     * @param file target directory {@link File}
+     * @param file target directory {@link Path}
      * @return {@code true} if dir was successfully deleted and false either
      */
     private boolean deleteDir(File file) {

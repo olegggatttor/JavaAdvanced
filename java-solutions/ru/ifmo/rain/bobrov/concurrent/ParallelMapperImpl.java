@@ -19,7 +19,7 @@ public class ParallelMapperImpl implements ParallelMapper {
     private final List<Thread> workers = new ArrayList<>();
 
     /**
-     * Public contstructor creates {@code threads} amount of {@link Thread} that
+     * Public constructor creates {@code threads} amount of {@link Thread} that
      * get tasks from task queue and do them in parallel.
      * If {@code threads} is not positive than throws {@link IllegalArgumentException}
      *
@@ -73,7 +73,7 @@ public class ParallelMapperImpl implements ParallelMapper {
         synchronized void run() {
             result = job.apply(element);
             isFinished = true;
-            notifyAll();
+            notify();
         }
 
         synchronized R getResult() throws InterruptedException {
@@ -110,11 +110,12 @@ public class ParallelMapperImpl implements ParallelMapper {
      */
     @Override
     public void close() {
-        synchronized (taskQueue) {
-            taskQueue.clear();
-            workers.forEach(Thread::interrupt);
-            workers.clear();
-            taskQueue.notify();
+        workers.forEach(Thread::interrupt);
+        for (Thread worker : workers) {
+            try {
+                worker.join();
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 }
