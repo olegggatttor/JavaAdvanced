@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * Class provides public methods to find maximum, minimum value or check
  * if all or any of elements of {@link List} match given predicate.
- *
+ * <p>
  * Class implements {@link ScalarIP} interface.
  *
  * @author Bobrov Oleg
@@ -21,6 +21,7 @@ import java.util.stream.Stream;
  */
 public class IterativeParallelism implements ScalarIP {
     private final ParallelMapper mapper;
+
     /**
      * Default constructor.
      */
@@ -51,7 +52,7 @@ public class IterativeParallelism implements ScalarIP {
             }
             index += curBlockSize;
         }
-        if(mapper == null) {
+        if (mapper == null) {
             partialResults = new ArrayList<>(Collections.nCopies(amountOfThreads, null));
             ArrayList<Thread> workers = new ArrayList<>();
             for (int curThread = 0; curThread < amountOfThreads; curThread++) {
