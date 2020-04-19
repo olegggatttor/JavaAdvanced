@@ -2,12 +2,15 @@ package ru.ifmo.rain.bobrov.concurrent;
 
 import info.kgeorgiy.java.advanced.mapper.ParallelMapper;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.function.Function;
 
 /**
  * Class provides public constructor and method to parallel given task
- *
+ * <p>
  * Class implements {@link ParallelMapper} interface
  *
  * @author Bobrov Oleg
