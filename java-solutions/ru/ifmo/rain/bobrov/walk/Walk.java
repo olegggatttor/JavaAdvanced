@@ -12,7 +12,7 @@ public class Walk {
 
     public static void main(String[] args) {
         if (args == null || args.length != 2 || args[0] == null || args[1] == null) {
-            System.out.println("Wrong arguments.");
+            System.err.println("Wrong arguments.");
             return;
         }
         Path pathIn;
@@ -21,17 +21,15 @@ public class Walk {
             pathIn = Paths.get(args[0]);
             pathOut = Paths.get(args[1]);
         } catch (InvalidPathException e) {
-            System.out.println("Input or output path is incorrect.");
+            System.err.println("Input or output path is incorrect.");
             return;
         }
         if (pathOut.getParent() != null) {
-            if (!Files.exists(pathOut.getParent())) {
-                try {
-                    Files.createDirectories(pathOut.getParent());
-                } catch (IOException e) {
-                    System.out.println("Impossible to create parent directory.");
-                    return;
-                }
+            try {
+                Files.createDirectories(pathOut.getParent());
+            } catch (IOException e) {
+                System.err.println("Impossible to create parent directory.");
+                return;
             }
         }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(pathIn.toFile()), StandardCharsets.UTF_8))) {
@@ -41,20 +39,20 @@ public class Walk {
                     writer.write(String.format("%08x %s%n", FNV(fileName), fileName));
                 }
             } catch (FileNotFoundException e) {
-                System.out.println("Output file not found.");
+                System.err.println("Output file not found.");
             } catch (IOException e) {
-                System.out.println("Error while writing files.");
+                System.err.println("Error while writing files.");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Input file not found.");
+            System.err.println("Input file not found.");
         } catch (IOException e) {
-            System.out.println("Error while reading  files.");
+            System.err.println("Error while reading  files.");
         }
     }
 
     private static int FNV(String fileName) {
         int hash = 0x811c9dc5;
-        try (FileInputStream inputStream = new FileInputStream(fileName)) {
+        try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(Paths.get(fileName)))) {
             byte[] buff = new byte[1024];
             int length;
             while ((length = inputStream.read(buff)) != -1) {
@@ -63,7 +61,7 @@ public class Walk {
                     hash ^= (buff[i] & 0xFF);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             return 0;
         }
         return hash;
