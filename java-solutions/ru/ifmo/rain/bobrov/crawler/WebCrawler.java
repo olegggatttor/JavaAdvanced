@@ -87,22 +87,24 @@ public class WebCrawler implements Crawler {
      */
     @Override
     public void close() {
-        downloadersService.shutdown();
+        /*downloadersService.shutdown();
         extractorsService.shutdown();
         try {
-            if (!downloadersService.awaitTermination(1L, TimeUnit.SECONDS)) {
+            if (!downloadersService.awaitTermination(500L, TimeUnit.MILLISECONDS)) {
                 downloadersService.shutdownNow();
             }
         } catch (InterruptedException e) {
             downloadersService.shutdownNow();
         }
         try {
-            if (!extractorsService.awaitTermination(1L, TimeUnit.SECONDS)) {
+            if (!extractorsService.awaitTermination(500L, TimeUnit.MILLISECONDS)) {
                 extractorsService.shutdownNow();
             }
         } catch (InterruptedException e) {
             extractorsService.shutdownNow();
-        }
+        }*/
+        downloadersService.shutdownNow();
+        extractorsService.shutdownNow();
     }
 
     private static int getArgs(int pos, String[] args) {
