@@ -38,11 +38,12 @@ public class HelloUDPClient implements HelloClient {
             return;
         }
         for (int i = 0; i < threads; i++) {
-            requestService.submit(() -> sendRequest(port, prefix, requests, serverHost, threads));
+            final int pos = i;
+            requestService.submit(() -> sendRequest(port, prefix, requests, pos, serverHost));
         }
         requestService.shutdown();
         try {
-            if (!requestService.awaitTermination(2L, TimeUnit.SECONDS)) {
+            if (!requestService.awaitTermination(20L, TimeUnit.SECONDS)) {
                 requestService.shutdownNow();
             }
         } catch (InterruptedException ex) {
@@ -50,8 +51,7 @@ public class HelloUDPClient implements HelloClient {
         }
     }
 
-    private void sendRequest(final int port, final String prefix, final int requests, final InetAddress serverHost,
-                             final int threads) {
+    private void sendRequest(final int port, final String prefix, final int requests, final int n, final InetAddress serverHost) {
         DatagramSocket socket;
         final int responseSize;
         try {
@@ -61,7 +61,6 @@ public class HelloUDPClient implements HelloClient {
         } catch (SocketException ex) {
             return;
         }
-        final long n = Thread.currentThread().getId() % threads;
         for (int i = 0; i < requests; i++) {
             final String requestName = (prefix + n + "_" + i);
             final byte[] request = requestName.getBytes(StandardCharsets.UTF_8);
