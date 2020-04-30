@@ -42,7 +42,7 @@ public class HelloUDPClient implements HelloClient {
         }
         requestService.shutdown();
         try {
-            if (!requestService.awaitTermination(10000L, TimeUnit.SECONDS)) {
+            if (!requestService.awaitTermination(5L, TimeUnit.SECONDS)) {
                 requestService.shutdownNow();
             }
         } catch (InterruptedException ex) {
