@@ -68,7 +68,7 @@ public class HelloUDPServer implements HelloServer {
         socket.close();
         receiveService.shutdown();
         try {
-            if (!receiveService.awaitTermination(5L, TimeUnit.SECONDS)) {
+            if (!receiveService.awaitTermination(2L, TimeUnit.SECONDS)) {
                 receiveService.shutdownNow();
             }
         } catch (InterruptedException ex) {
