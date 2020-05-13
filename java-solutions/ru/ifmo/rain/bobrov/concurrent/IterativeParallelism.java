@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class IterativeParallelism implements ScalarIP {
     private final ParallelMapper mapper;
     /**
-     * Default constructor
+     * Default constructor.
      */
     public IterativeParallelism() {
         mapper = null;
@@ -38,7 +38,7 @@ public class IterativeParallelism implements ScalarIP {
         if (threads <= 0) {
             throw new IllegalArgumentException("Number of threads must be positive.");
         }
-        final int amountOfThreads = Math.min(threads, values.size());
+        final int amountOfThreads = Math.max(1,Math.min(threads, values.size()));
         final int blockSize = values.size() / amountOfThreads;
         final int remainder = values.size() % amountOfThreads;
         ArrayList<Stream<? extends T>> streams = new ArrayList<>();
