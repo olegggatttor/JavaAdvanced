@@ -64,12 +64,12 @@ public class HelloUDPClient implements HelloClient {
         for (int i = 0; i < requests; i++) {
             final String requestName = (prefix + n + "_" + i);
             final byte[] request = requestName.getBytes(StandardCharsets.UTF_8);
-            final DatagramPacket packet = new DatagramPacket(request, request.length, serverHost, port);
+            final byte[] response = new byte[responseSize];
+            final DatagramPacket packetSend = new DatagramPacket(request, request.length, serverHost, port);
+            final DatagramPacket packetReceive = new DatagramPacket(response, response.length);
             while (!socket.isClosed()) {
                 try {
-                    socket.send(packet);
-                    final byte[] response = new byte[responseSize];
-                    final DatagramPacket packetReceive = new DatagramPacket(response, response.length);
+                    socket.send(packetSend);
                     socket.receive(packetReceive);
                     final String answer = new String(packetReceive.getData(), packetReceive.getOffset(), packetReceive.getLength(),
                             StandardCharsets.UTF_8);
