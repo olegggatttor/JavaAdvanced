@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class IterativeParallelism implements ScalarIP {
     private final ParallelMapper mapper;
     /**
-     * Default constructor.
+     * Default constructor
      */
     public IterativeParallelism() {
         mapper = null;
