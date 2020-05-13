@@ -52,35 +52,32 @@ public class HelloUDPClient implements HelloClient {
     }
 
     private void sendRequest(final int port, final String prefix, final int requests, final int n, final InetAddress serverHost) {
-        DatagramSocket socket;
-        final int responseSize;
-        try {
-            socket = new DatagramSocket();
+        try (DatagramSocket socket = new DatagramSocket()) {
             socket.setSoTimeout(500);
-            responseSize = socket.getReceiveBufferSize();
-        } catch (SocketException ex) {
-            return;
-        }
-        for (int i = 0; i < requests; i++) {
-            final String requestName = (prefix + n + "_" + i);
-            final byte[] request = requestName.getBytes(StandardCharsets.UTF_8);
-            final byte[] response = new byte[responseSize];
-            final DatagramPacket packetSend = new DatagramPacket(request, request.length, serverHost, port);
+            final int receiveSize = socket.getReceiveBufferSize();
+            final byte[] response = new byte[receiveSize];
+            final DatagramPacket packetRequest = new DatagramPacket(new byte[0], 0, serverHost, port);
             final DatagramPacket packetReceive = new DatagramPacket(response, response.length);
-            while (!socket.isClosed()) {
-                try {
-                    socket.send(packetSend);
-                    socket.receive(packetReceive);
-                    final String answer = new String(packetReceive.getData(), packetReceive.getOffset(), packetReceive.getLength(),
-                            StandardCharsets.UTF_8);
-                    if (answer.equals("Hello, " + requestName)) {
-                        System.out.println(answer);
-                        break;
-                    }
-                } catch (IOException ignored) {
+            for (int i = 0; i < requests; i++) {
+                final String requestName = (prefix + n + "_" + i);
+                packetRequest.setData(requestName.getBytes(StandardCharsets.UTF_8));
+                while (!socket.isClosed()) {
+                    try {
+                        socket.send(packetRequest);
+                        socket.receive(packetReceive);
+                        final String answer = new String(packetReceive.getData(), packetReceive.getOffset(), packetReceive.getLength(),
+                                StandardCharsets.UTF_8);
+                        if (answer.equals("Hello, " + requestName)) {
+                            System.out.println(answer);
+                            break;
+                        }
+                    } catch (IOException ignored) {
 
+                    }
                 }
             }
+        } catch (SocketException ex) {
+            System.err.println(ex.getMessage());
         }
     }
 
