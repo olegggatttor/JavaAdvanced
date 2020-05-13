@@ -41,21 +41,13 @@ public class HelloUDPClient implements HelloClient {
             final int pos = i;
             requestService.submit(() -> sendRequest(port, prefix, requests, pos, serverHost));
         }
-        requestService.shutdown();
-        try {
-            if (!requestService.awaitTermination(10000, TimeUnit.SECONDS)) {
-                requestService.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            requestService.shutdownNow();
-        }
+        HelloUtils.shutdownPool(requestService);
     }
 
     private void sendRequest(final int port, final String prefix, final int requests, final int n, final InetAddress serverHost) {
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setSoTimeout(500);
-            final int receiveSize = socket.getReceiveBufferSize();
-            final byte[] response = new byte[receiveSize];
+            final byte[] response = new byte[socket.getReceiveBufferSize()];
             final DatagramPacket packetRequest = new DatagramPacket(new byte[0], 0, serverHost, port);
             final DatagramPacket packetReceive = new DatagramPacket(response, response.length);
             for (int i = 0; i < requests; i++) {
@@ -65,8 +57,7 @@ public class HelloUDPClient implements HelloClient {
                     try {
                         socket.send(packetRequest);
                         socket.receive(packetReceive);
-                        final String answer = new String(packetReceive.getData(), packetReceive.getOffset(), packetReceive.getLength(),
-                                StandardCharsets.UTF_8);
+                        final String answer = HelloUtils.getString(packetReceive);
                         if (answer.equals("Hello, " + requestName)) {
                             System.out.println(answer);
                             break;

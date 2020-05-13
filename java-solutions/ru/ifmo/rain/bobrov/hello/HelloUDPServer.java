@@ -49,8 +49,7 @@ public class HelloUDPServer implements HelloServer {
                 while (!socket.isClosed()) {
                     try {
                         socket.receive(packet);
-                        byte[] answer = ("Hello, " + new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8))
-                                .getBytes(StandardCharsets.UTF_8);
+                        byte[] answer = ("Hello, " + HelloUtils.getString(packet)).getBytes(StandardCharsets.UTF_8);
                         socket.send(new DatagramPacket(answer, answer.length, packet.getSocketAddress()));
                     } catch (IOException ignored) {
 
@@ -66,15 +65,7 @@ public class HelloUDPServer implements HelloServer {
     @Override
     public void close() {
         socket.close();
-        receiveService.shutdown();
-        try {
-            if (!receiveService.awaitTermination(10L, TimeUnit.SECONDS)) {
-                receiveService.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            receiveService.shutdownNow();
-        }
-        //receiveService.shutdownNow();
+        HelloUtils.shutdownPool(receiveService);
     }
 
     /**
