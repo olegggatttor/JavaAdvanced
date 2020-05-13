@@ -43,7 +43,7 @@ public class HelloUDPClient implements HelloClient {
         }
         requestService.shutdown();
         try {
-            if (!requestService.awaitTermination(20L, TimeUnit.SECONDS)) {
+            if (!requestService.awaitTermination(10000, TimeUnit.SECONDS)) {
                 requestService.shutdownNow();
             }
         } catch (InterruptedException ex) {
@@ -56,7 +56,7 @@ public class HelloUDPClient implements HelloClient {
         final int responseSize;
         try {
             socket = new DatagramSocket();
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(500);
             responseSize = socket.getReceiveBufferSize();
         } catch (SocketException ex) {
             return;

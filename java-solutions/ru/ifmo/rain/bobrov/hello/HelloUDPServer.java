@@ -37,7 +37,6 @@ public class HelloUDPServer implements HelloServer {
         final int requestSize;
         try {
             socket = new DatagramSocket(port);
-            socket.setSoTimeout(1000);
             requestSize = socket.getReceiveBufferSize();
         } catch (SocketException ex) {
             ex.printStackTrace();
@@ -50,7 +49,8 @@ public class HelloUDPServer implements HelloServer {
                 while (!socket.isClosed()) {
                     try {
                         socket.receive(packet);
-                        byte[] answer = ("Hello, " + new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
+                        byte[] answer = ("Hello, " + new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8))
+                                .getBytes(StandardCharsets.UTF_8);
                         socket.send(new DatagramPacket(answer, answer.length, packet.getSocketAddress()));
                     } catch (IOException ignored) {
 
@@ -68,7 +68,7 @@ public class HelloUDPServer implements HelloServer {
         socket.close();
         receiveService.shutdown();
         try {
-            if (!receiveService.awaitTermination(2L, TimeUnit.SECONDS)) {
+            if (!receiveService.awaitTermination(10L, TimeUnit.SECONDS)) {
                 receiveService.shutdownNow();
             }
         } catch (InterruptedException ex) {
