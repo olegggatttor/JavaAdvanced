@@ -7,11 +7,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class of server working with UDP protocol implementing {@link HelloServer}
@@ -74,17 +71,13 @@ public class HelloUDPServer implements HelloServer {
      * @param args
      */
     public static void main(String[] args) {
-        if (args.length != 2 || Arrays.stream(args).anyMatch(Objects::isNull)) {
+        if (HelloUtils.validateArguments(2, args)) {
             System.err.println("Wrong arguments");
             return;
         }
-        HelloServer server = new HelloUDPServer();
-        try {
-            final int port = Integer.parseInt(args[0]);
-            final int threads = Integer.parseInt(args[1]);
-            server.start(port, threads);
-        } catch (NumberFormatException ex) {
-            System.err.println("Port and threads should be values of type int.");
+        try(HelloServer server = new HelloUDPServer()) {
+            HelloUtils.runServer(server, args);
         }
+
     }
 }

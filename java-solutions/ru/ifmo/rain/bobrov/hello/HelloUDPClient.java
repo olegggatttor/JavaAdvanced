@@ -5,17 +5,13 @@ import info.kgeorgiy.java.advanced.hello.HelloClient;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Public class provides client interface working with UDP protocol and implementing {@link HelloClient}
  */
 public class HelloUDPClient implements HelloClient {
-
 
     /**
      * Default constructor.
@@ -30,25 +26,19 @@ public class HelloUDPClient implements HelloClient {
     @Override
     public void run(final String host, final int port, final String prefix, final int threads, final int requests) {
         final ExecutorService requestService = Executors.newFixedThreadPool(threads);
-        final InetAddress serverHost;
-        try {
-            serverHost = InetAddress.getByName(host);
-        } catch (UnknownHostException ex) {
-            System.err.println("Unknown host name:" + host);
-            return;
-        }
+        final InetSocketAddress serverHost = new InetSocketAddress(host, port);
         for (int i = 0; i < threads; i++) {
             final int pos = i;
-            requestService.submit(() -> sendRequest(port, prefix, requests, pos, serverHost));
+            requestService.submit(() -> sendRequest(prefix, requests, pos, serverHost));
         }
         HelloUtils.shutdownPool(requestService);
     }
 
-    private void sendRequest(final int port, final String prefix, final int requests, final int n, final InetAddress serverHost) {
+    private void sendRequest(final String prefix, final int requests, final int n, final InetSocketAddress socketAddress) {
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setSoTimeout(500);
             final byte[] response = new byte[socket.getReceiveBufferSize()];
-            final DatagramPacket packetRequest = new DatagramPacket(new byte[0], 0, serverHost, port);
+            final DatagramPacket packetRequest = new DatagramPacket(new byte[0], 0, socketAddress);
             final DatagramPacket packetReceive = new DatagramPacket(response, response.length);
             for (int i = 0; i < requests; i++) {
                 final String requestName = (prefix + n + "_" + i);
@@ -59,7 +49,7 @@ public class HelloUDPClient implements HelloClient {
                         socket.receive(packetReceive);
                         final String answer = HelloUtils.getString(packetReceive);
                         if (answer.equals("Hello, " + requestName)) {
-                            System.out.println(answer);
+                            //System.out.println(answer);
                             break;
                         }
                     } catch (IOException ignored) {
@@ -78,20 +68,11 @@ public class HelloUDPClient implements HelloClient {
      * @param args
      */
     public static void main(String[] args) {
-        if (args.length != 5 || Arrays.stream(args).anyMatch(Objects::isNull)) {
+        if (HelloUtils.validateArguments(5, args)) {
             System.err.println("Wrong arguments");
             return;
         }
         final HelloClient client = new HelloUDPClient();
-        try {
-            final String host = args[0];
-            final int port = Integer.parseInt(args[1]);
-            final String prefix = args[2];
-            final int threads = Integer.parseInt(args[3]);
-            final int requestsPerThread = Integer.parseInt(args[4]);
-            client.run(host, port, prefix, threads, requestsPerThread);
-        } catch (NumberFormatException ex) {
-            System.err.println("Port, thread and requests per thread must be values of type int.");
-        }
+        HelloUtils.runClient(client, args);
     }
 }
